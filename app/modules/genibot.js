@@ -2,18 +2,32 @@ const BaseModule = require('./baseModule');
 const atob = require('atob');
 
 const fs = require('fs');
-const log = (val)=>{
-    fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `${val}\n`, function (err) {
-        if (err) throw err;
+const log = (val) => {
+    if (Array.isArray(val)) {
+        fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `[${val.toString()}]\n`, function(err) {
+            if (err) {
+                throw err;
+            }
+            // log('Saved!');/
+        });
+    } else {
+        fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `${val}\n`, function(err) {
+            if (err) {
+                throw err;
+            }
+            // log('Saved!');/
+        });
+    }
+
+};
+const log2 = (val) => {
+    fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `${val},`, function(err) {
+        if (err) {
+            throw err;
+        }
         // log('Saved!');/
-      });
-}
-const log2 = (val)=>{
-    fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `${val},`, function (err) {
-        if (err) throw err;
-        // log('Saved!');/
-      });
-}
+    });
+};
 // import rendererConsole from './core/rendererConsole';
 // import rendererConsole from '../src/main/core/rendererConsole';
 // import WindowManager from'../src/main/electron/windowManager'; //'./windowManager';
@@ -52,7 +66,7 @@ const GenibotBleUUID = {
     discoveryNameFilter: 'GENI',
     service: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
     txChar: '6e400002-b5a3-f393-e0a9-e50e24dcca9e',
-    rxChar: '6e400003-b5a3-f393-e0a9-e50e24dcca9e'
+    rxChar: '6e400003-b5a3-f393-e0a9-e50e24dcca9e',
 };
 
 //const logger = createLogger('module/genibot.js');
@@ -66,16 +80,16 @@ const GenibotBleUUID = {
  * @enum {number}
  */
 const OP_CODE = {
-    STEPPERS: 0xC0, 
-    CARDS: 0xC1, 
-    PERIPHERALS: {SET: 0xC2, GET: 0xB1},  
-    ROBOT: 0xB0 
+    STEPPERS: 0xC0,
+    CARDS: 0xC1,
+    PERIPHERALS: { SET: 0xC2, GET: 0xB1 },
+    ROBOT: 0xB0,
 };
 /**
  * Enum for message task id assigned to GeniBot such as steppers, cards, peripherals, and etc,
  * Stepper functions for direct control,  see Programmer's guide.
- * Unplugged functions, you can create multiple data set with unplugged cards,   
- * When you start line follwer, illumination leds will be turned on,  
+ * Unplugged functions, you can create multiple data set with unplugged cards,
+ * When you start line follwer, illumination leds will be turned on,
  * SetLedColor: led color in HSV color space,
  * SetSpeakerVolume: Set speakcer loudness from 1 to 9, set zero to maximum volume (default),
  * GetSensors: Read button status, acceleration and tilt status
@@ -84,24 +98,24 @@ const OP_CODE = {
  * @enum {number}
  */
 const TASK_ID = {
-    STEPPERS: { 
-            SET_PAUSE_STEPS: 0xA0, 
-            SET_CONTINUOUS_STEPS: 0xA1, 
-            SET_SINGLE_STEPS: 0xA2,   
-            SET_MOTION_STEPS: 0xA6 
+    STEPPERS: {
+        SET_PAUSE_STEPS: 0xA0,
+        SET_CONTINUOUS_STEPS: 0xA1,
+        SET_SINGLE_STEPS: 0xA2,
+        SET_MOTION_STEPS: 0xA6,
     },
-    CARDS: {      
-            SET_MUSIC_NOTES: 0xA3,
-            SET_LINE_FOLLOWER: 0xA4          
+    CARDS: {
+        SET_MUSIC_NOTES: 0xA3,
+        SET_LINE_FOLLOWER: 0xA4,
     },
-    PERIPHERALS: { 
-            SET_COLOR_LED: 0xC1, 
-            SET_SPEAKER_VOLUME: 0xC3, 
-            GET_SENSORS: 0xB2 
+    PERIPHERALS: {
+        SET_COLOR_LED: 0xC1,
+        SET_SPEAKER_VOLUME: 0xC3,
+        GET_SENSORS: 0xB2,
     },
     ROBOT: {
-            GET_VERSION: 0xA1 
-    }
+        GET_VERSION: 0xA1,
+    },
 };
 /**
  * Enum for action property assigned to GeniBot
@@ -109,9 +123,9 @@ const TASK_ID = {
  * @enum {number}
  */
 const ACTION_STATE = {
-     PAUSE: 0x00,
-     START: 0x01,
-     RESUME: 0x02
+    PAUSE: 0x00,
+    START: 0x01,
+    RESUME: 0x02,
 };
 /**
  * Enum for step rate in samples per seconds assigned to GeniBot
@@ -122,10 +136,10 @@ const ACTION_STATE = {
  * @readonly
  * @enum {number}
  */
-const STEPPER_RATE = { 
-    SLOW: 900, 
-    NORMAL: 950, 
-    FAST: 1000 
+const STEPPER_RATE = {
+    SLOW: 900,
+    NORMAL: 950,
+    FAST: 1000,
 };
 /**
  * Enum for music notes assigned to GeniBot
@@ -151,7 +165,7 @@ const NOTES_CODES = {
     highRe: 15,
     highReSharp: 16,
     highMi: 17,
-    highFa: 18
+    highFa: 18,
 };
 /**
  * Enum for moving distance limit in cm
@@ -159,17 +173,17 @@ const NOTES_CODES = {
  * @enum {number}
  */
 const GenibotDistanceLimit = {
-    MIN: 1, 
-    MAX: 30
+    MIN: 1,
+    MAX: 30,
 };
 /**
  * Enum for rotational angle limit in cm
  * @readonly
  * @enum {number}
  */
-const GenibotAngleLimit = { 
-    MIN: 0,    
-    MAX: 360
+const GenibotAngleLimit = {
+    MIN: 0,
+    MAX: 360,
 };
 /**
  * @param {int} value - value
@@ -178,36 +192,38 @@ const GenibotAngleLimit = {
  */
 const convertIntToUint8Array = (value, length) => {
     let hexString = (value >>> 0).toString(16).substr(-4)
-            .toUpperCase()
-            .padStart(4, '0');
+        .toUpperCase()
+        .padStart(4, '0');
     const array = [];
     let hexStringLength = hexString.length;
     while (hexStringLength > 0) {
-            array.push(parseInt(`0x${hexString.slice(0, 2)}`, 16));
-            hexString = hexString.slice(2);
-            hexStringLength -= 2;
+        array.push(parseInt(`0x${hexString.slice(0, 2)}`, 16));
+        hexString = hexString.slice(2);
+        hexStringLength -= 2;
     }
     return new Uint8Array(array, length);
 };
 /**
- * @returns {hex} - 32bit negative bit conversion in java script  
+ * @returns {hex} - 32bit negative bit conversion in java script
  */
-const convertHexToSignedInt = hex => {    
-    if ((hex & 0x8000) > 0) {   hex = 0xFFFF0000 | hex; }     
+const convertHexToSignedInt = hex => {
+    if ((hex & 0x8000) > 0) {
+        hex = 0xFFFF0000 | hex;
+    }
     return hex;
 };
 
 const base64ToUint8Array = (base64) => {
-    log("base64ToUint8Array")
+    log('base64ToUint8Array');
     const binaryString = atob(base64);
-    log(binaryString)
+    log(binaryString);
     const len = binaryString.length;
     const array = new Uint8Array(len);
     for (let i = 0; i < len; i++) {
         array[i] = binaryString.charCodeAt(i);
     }
     return array;
-}
+};
 
 class Module extends BaseModule {
     constructor() {
@@ -218,58 +234,66 @@ class Module extends BaseModule {
         this.isSendInitData = false;
         this.isConnect = false;
 
-        this.buttonStatus = {status: 0}; 
-        this.accelerationSensor = {aX: 0, aY: 0, aZ: 0, tilt: 0, tiltStatus: ""}; 
-        this.lightSensor = {R2: 0, R1: 0, L1: 0, L2: 0};
-        this.arduino = {ain: 0}; 
+        this.buttonStatus = { status: 0 };
+        this.accelerationSensor = { aX: 0, aY: 0, aZ: 0, tilt: 0, tiltStatus: '' };
+        this.lightSensor = { R2: 0, R1: 0, L1: 0, L2: 0 };
+        this.arduino = { ain: 0 };
 
         this.sp = null;
         this.digitalPin = [];
         this.sendBuffers = [];
         this.receiveBuffers = [];
 
+        ////
+        this.cmd = {};
+
         /////////////////////////////////
         this._busy = false;
+        this.isDraing = false;
+
         /**
          * ID for a timeout which is used to clear the busy flag if it has been
          * true for a long time.
          */
         this._timeoutID = null;
         this._busyTimeoutID = null;
-        /** 
+        /**
          * Speficy each robot id from 0 to 7 in Star network, or ffh to broadcast a message to robots that are connected to Star robot.
          * Star network can be available by using "GeniBot Star Network" extention,
          * accelerationSensor: The state-art of 3-axis acceleration, from -1.00g to +1.00g @ 2g scale
          * lightSensor: Reading brightness of ambient light
          * buttonStatus: Button status as latched, pressed or normal state
          * arduino: Reading data from arduino sensors
-         * ledColor: To store present four led colors in RGB space, 
+         * ledColor: To store present four led colors in RGB space,
          */
-        this.accelerationSensor = {aX: 0, aY: 0, aZ: 0, tilt: 0, tiltStatus: ""}; 
-        this.lightSensor = {R2: 0, R1: 0, L1: 0, L2: 0};
-        this.buttonStatus = {status: 0}; 
-        this.arduino = {ain: 0}; 
-        this.oidCode ={decimal: 65535}
-        /** 
+        this.accelerationSensor = { aX: 0, aY: 0, aZ: 0, tilt: 0, tiltStatus: '' };
+        this.lightSensor = { R2: 0, R1: 0, L1: 0, L2: 0 };
+        this.buttonStatus = { status: 0 };
+        this.arduino = { ain: 0 };
+        this.oidCode = { decimal: 65535 };
+        /**
          * Robot property as:
          * Sampling period 250ms, it is avaiable from 10 (0.1ms) to 100 (1.0s)
-        */
-        this.robot = {version: 1, id: 0x0, samplingPeriods: 0x19};
+         */
+        this.robot = { version: 1, id: 0x0, samplingPeriods: 0x19 };
         this.music = {
             instrument: 'piano', // Default instrument 'piano'
-            tempo: 100
+            tempo: 100,
         };
+        this.next_ack = 0;
 
         ////// GENI BLOCK CLASS CONSTRUCTOR
         const distanceError = (2 * 1000 * 0.81) / (3.141592 * 3.2 * 1.25);
-        this.runtime = runtime;
-        this.motion = { stepRate: STEPPER_RATE.NORMAL, 
-                        distanceMultiplier: distanceError ,
-                        angleMultiplier: (distanceError  * 3.141592 * 5.0 * 1.01 / 360)
+        // this.runtime = runtime;
+        this.motion = {
+            stepRate: STEPPER_RATE.NORMAL,
+            distanceMultiplier: distanceError,
+            angleMultiplier: (distanceError * 3.141592 * 5.0 * 1.01 / 360),
         };
-        this.linefollower = { action : ACTION_STATE.PAUSE }; 
+        this.linefollower = { action: ACTION_STATE.PAUSE };
+        log('constructor End');
     }
-    
+
     init(handler, config) {
         //process.exit();
         // 엔트리 브라우저와 연결되었을때 호출됨
@@ -278,21 +302,22 @@ class Module extends BaseModule {
     }
 
     // deprecated
-    // afterConnect(connector, cb) {
-    //     log('afterConnect genibot');
-    //     // handshake 종료 후 정상 연결상태로 진입전에 호출됨. connector 와 UI state 를 강제변경할 수 있으나 비추천
-    //     connector.connected = true;
-    //     this.isConnect = true;
-    //     if (cb) {
-    //         cb('connected'); // 해당 string state 로 UI state 를 강제변경하나 문제를 일으킬 수 있습니다.
-    //     }
-    // }
+    afterConnect(connector, cb) {
+        log('afterConnect');
+        //     log('afterConnect genibot');
+        //     // handshake 종료 후 정상 연결상태로 진입전에 호출됨. connector 와 UI state 를 강제변경할 수 있으나 비추천
+        //     connector.connected = true;
+        //     this.isConnect = true;
+        //     if (cb) {
+        //         cb('connected'); // 해당 string state 로 UI state 를 강제변경하나 문제를 일으킬 수 있습니다.
+        //     }
+    }
 
     setSerialPort(sp) {
         //process.exit();
         // 최초 연결시도(handshake) 성공 후에 호출됨
         this.sp = sp;
-        log('setSerialPort',sp,`${typeof sp}`);
+        log('setSerialPort', sp, `${typeof sp}`);
         //logger.info('setSerialPort');
     }
 
@@ -304,9 +329,9 @@ class Module extends BaseModule {
         if (!this.sp) {
             this.sp = sp;
         }
-        if(!this.isSendInitData){
+        if (!this.isSendInitData) {
             this.isConnect = true;
-            
+
             // const startRobotCMD =  this.getSensors(this.robot.samplingPeriods);
             // const startRobotCMD =  this.getSensors(100);
 
@@ -317,32 +342,32 @@ class Module extends BaseModule {
             //     this.isSendInitData = true;
             // });
             // this.send(startRobotCMD)
-            
+
             // const verCmd = this.getVersion();
             // this.send(verCmd);
 
 
             //===============================
-
+            log(startRobot);
             const startRobot = new Promise(resolve => {
                 // rendererConsole.log(`I am finally connected`);
                 console.log('Start the robot.');
-                const sensorCmd =  this.getSensors(this.robot.samplingPeriods);
+                const sensorCmd = this.getSensors(this.robot.samplingPeriods);
                 this.send(sensorCmd);
 
                 setTimeout(() => {
                     resolve();
-                }, BLETimeout); 
-             });
-             startRobot.finally(()=>{
+                }, BLETimeout);
+            });
+            startRobot.finally(() => {
                 const verCmd = this.getVersion();
                 this.send(verCmd);
-             })
-                
+            });
+
         }
-        
+
         // 최초 연결시도시 디바이스에 보낼 데이터. checkInitialData 가 선언되어있다면 필수
-        
+
         //logger.info('requestInitialData');
         return null;
     }
@@ -357,12 +382,12 @@ class Module extends BaseModule {
         this.sp.write(this.getVersion(), (error) => {
             this._busy = false;
             this.isSendInitData = true;
-            log("getVersion")
-            if(!error){
+            log('getVersion');
+            if (!error) {
                 const return_data = this.sp.read();
-                log("return_data")
-                log(return_data)
-                
+                log('return_data');
+                log(return_data);
+
             }
         });
         // this.send(this.getVersion(),(e)=>{log("getVersion");log(e)})
@@ -371,7 +396,7 @@ class Module extends BaseModule {
         return true;
     }
 
-    
+
     /*************************************************************************
      * Name: validateLocalData
      *
@@ -388,8 +413,8 @@ class Module extends BaseModule {
         // log(data);
         // 해당 함수가 존재하면, 디바이스에서 데이터를 받아온 후 validate 를 거친다. 없으면 그대로 처리로직으로 진행한다.
         //return (data.byteLength == 25 || data.byteLength == 29 || data.byteLength == 9)
-        
-          return true;  
+
+        return true;
     }
 
     /*************************************************************************
@@ -404,22 +429,33 @@ class Module extends BaseModule {
         // log('requestRemoteData genibot');
         // handler.write("BUTTON", "1")
         // log(this.buttonStatus.status.toString())
-        console.log('HELLOWORLD')
-        if ( this.buttonStatus.status >0){ // button pressed
+        /*console.log('HELLOWORLD');
+        if (this.buttonStatus.status > 0) { // button pressed
             this.buttonStatus.status = 0;
             // handler.write("BUTTON", "1")
-            log("Button 1")
-            
-        }else{
+            log('Button 1');
+
+        } else {
             // handler.write("BUTTON", "0")
             // log("Button 0")
 
-        }
-        
+        }*/
+
         // 디바이스에서 데이터를 받아온 후, 브라우저로 데이터를 보내기 위해 호출되는 로직. handler 를 세팅하는 것으로 값을 보낼 수 있다.
         // handler.write(key, value) 로 세팅한 값은 Entry.hw.portData 에서 받아볼 수 있다.
 
     };
+
+    isValidACK(ack) {
+        if (ack && this.next_ack <= ack) {
+            this.next_ack = ack + 1;
+            log('ACK' + ack);
+            log('next_ACK' + this.next_ack);
+
+            return true;
+        }
+        return false;
+    }
 
     /*************************************************************************
      * Name: handleRemoteData
@@ -429,35 +465,49 @@ class Module extends BaseModule {
      * Returned Value :
      *************************************************************************/
     handleRemoteData(handler) {
-        
+
         //logger.info('checkInitialData genibot');
         // log('handleRemoteData genibot');
 
-        const set_led = handler.read('SET_LED_COLOR')
-        if(set_led){
-            const ledColor = set_led['COLOR']
-            const side = set_led['SIDE']
-            log(ledColor)
-            // log(side)
-            this.setLED(ledColor,side)
-            
+        const set_led = handler.read('SET_LED_COLOR');
+        if (set_led) {
+            if (this.isValidACK(set_led['ACK'])) {
+                const ledColor = set_led['COLOR'];
+                const side = set_led['SIDE'];
+                log('LEDCOLOR');
+
+                log(ledColor);
+                log('side', side);
+
+                this.setLED(ledColor, side);
+            }
         }
-        
+
+
         // const setRSI = handler.read('SET_ROBOT_SPEED_ITEM')
         // const setRSI = handler.e('SET_ROBOT_SPEED_ITEM')
-        if(handler.e('SET_ROBOT_SPEED_ITEM')){
-            const setRSI = handler.read('SET_ROBOT_SPEED_ITEM')
-
-            log(`setRSI${setRSI.SPEED}`)
+        // if (handler.e('SET_ROBOT_SPEED_ITEM')) {
+        //     const setRSI = handler.read('SET_ROBOT_SPEED_ITEM');
+        //
+        //     log(`setRSI${setRSI.SPEED}`);
+        // }
+        if (handler.e('TURN_ANGLE')) {
+            const args = handler.read('TURN_ANGLE');
+            if (this.isValidACK(args['ACK'])) {
+                this.cmd = { 'TURN_ANGLE': args };
+                this.turnAngle(args);
+            }
+        }
+        if (handler.e('MOVE_DISTANCE')) {
+            const args = handler.read('MOVE_DISTANCE');
+            if (this.isValidACK(args['ACK'])) {
+                // const direction = handler.read('DIRECTION')
+                console.log('args MOVE_DISTANCE');
+                this.cmd = { 'MOVE_DISTANCE': args };
+                this.moveDistance(args);
+            }
         }
 
-        if(handler.e('MOVE_DISTANCE')){
-            const args = handler.read('MOVE_DISTANCE')
-            this.moveDistance(args)
-        }
-
-        
-        
 
         // 엔트리 브라우저에서 온 데이터를 처리한다. handler.read 로 브라우저의 데이터를 읽어올 수 있다.
         // handler 의 값은 Entry.hw.sendQueue 에 세팅한 값과 같다.
@@ -477,6 +527,16 @@ class Module extends BaseModule {
         //     this.sendBuffers.push(buffer);
         // }
     }
+
+    /**
+     * delay
+     * @param {*} ms
+     */
+    resolveTimePromise(milliseconds) {
+        // return false
+        return new Promise(resolve => setTimeout(resolve, milliseconds));
+    }
+
     /*************************************************************************
      * Name: requestLocalData
      *
@@ -486,7 +546,7 @@ class Module extends BaseModule {
      *
      * Returned Value :
      *************************************************************************/
-    requestLocalData() {
+    requestLocalData() { //sendToGENI
         //logger.info('checkInitialData genibot');
         // log('requestLocalData genibot');
         // 디바이스로 데이터를 보내는 로직. control: slave 인 경우 duration 주기에 맞춰 디바이스에 데이터를 보낸다.
@@ -501,16 +561,35 @@ class Module extends BaseModule {
         //         }
         //     });
         // }
+        var self = this;
+        log('sendToGENI');
+        if (!this.isDraing && this.sendBuffers.length > 0) {
+            this.isDraing = true;
+            const cmd = this.sendBuffers.shift();
+            log('isDraing[' + cmd + '] left:' + this.sendBuffers.length);
+            this.sp.write(cmd, function() {
+                if (self.sp) {
+                    self.sp.drain(function() {
+                        setTimeout(function() {
+                            self.isDraing = false;
+                            log('DRAINING FALSE');
+                        }, 1000);
+                    });
+                }
+            });
+        }
+        // this.sp.write(new Buffer([0xC1, 0xFF, 0x00, 0xC2, 0x00, 0x0B, 0x02, 0xFF, 0xFF, 0x32, 0xFF]))
+
 
         return null;
     }
-    _onMessage(data){
-        
-        if (data == undefined || data.length == 0)
-        {
+
+    _onMessage(data) {
+
+        if (data == undefined || data.length == 0) {
             return;
         }
-        // const test = base64ToUint8Array(data);  
+        // const test = base64ToUint8Array(data);
 
 
         // log(`test${test.length}`)
@@ -520,11 +599,11 @@ class Module extends BaseModule {
         //     // if(this.receiveBuffers.length)
         //     // this.receiveBufferss
         //     // log(`8BYTE${data[8]}`)
-        //     log(`7BYTET${test[7]}`) 
-        //     log(`7BYTED${data[7]}`) 
-        //     // log(`6BYTE${data[6]}`) 
+        //     log(`7BYTET${test[7]}`)
+        //     log(`7BYTED${data[7]}`)
+        //     // log(`6BYTE${data[6]}`)
         //     // log("H")
-            
+
         // }
         // if (data.byteLength == 25 || data.byteLength == 29){
         //     this.buttonStatus.status = data[12];
@@ -533,43 +612,42 @@ class Module extends BaseModule {
         //     }
         // }
 
-        if (data.byteLength == 25 || data.byteLength == 29) {       
-            log(data.byteLength)
-            log(data.length)  
-            for(let i =0;i<data.length;i++){
-                log2(data[i])
+        if (data.byteLength == 25 || data.byteLength == 29) {
+            log(data.byteLength);
+            log(data.length);
+            for (let i = 0; i < data.length; i++) {
+                log2(data[i]);
             }
 
-            log(" ")
+            log(' ');
             // if(data[7] >0)
             this.buttonStatus.status = data[7];
-            log("BUTTON"+ data[7])
-            this.lightSensor = { 
+            log('BUTTON' + data[7]);
+            this.lightSensor = {
                 R2: (data[9] << 8 | data[8]),
                 R1: (data[11] << 8 | data[10]),
                 L1: (data[13] << 8 | data[12]),
-                L2: (data[15] << 8 | data[14]),                    
+                L2: (data[15] << 8 | data[14]),
             };
             this.accelerationSensor = {
-                aX: Math.round((convertHexToSignedInt(data[17] << 8 | data[16]) / 16384) * 100) * 0.01, 
-                aY: Math.round((convertHexToSignedInt(data[19] << 8 | data[18]) / 16384) * 100) * 0.01, 
-                aZ: Math.round((convertHexToSignedInt(data[21] << 8 | data[20]) / 16384) * 100) * 0.01, 
-                tilt: (data[22] & 0x80) > 0 ? data[22] - 0x100 : data[22]
+                aX: Math.round((convertHexToSignedInt(data[17] << 8 | data[16]) / 16384) * 100) * 0.01,
+                aY: Math.round((convertHexToSignedInt(data[19] << 8 | data[18]) / 16384) * 100) * 0.01,
+                aZ: Math.round((convertHexToSignedInt(data[21] << 8 | data[20]) / 16384) * 100) * 0.01,
+                tilt: (data[22] & 0x80) > 0 ? data[22] - 0x100 : data[22],
             };
             this.arduino = {
-                ain: (data[24] << 8 | data[23]) 
-            }; 
-            if(data.byteLength == 29)  {
-                this.oidCode = {decimal: (data[26] << 8 | data[25]) } 
-            }         
-        }            
-        else if (data.byteLength == 9) {  
-            if(data[3] == OP_CODE.ROBOT && data[0] == TASK_ID.ROBOT.GET_VERSION) {
-                                this.robot.version = data[7] << 8 |  data[8] ;
+                ain: (data[24] << 8 | data[23]),
+            };
+            if (data.byteLength == 29) {
+                this.oidCode = { decimal: (data[26] << 8 | data[25]) };
+            }
+        } else if (data.byteLength == 9) {
+            if (data[3] == OP_CODE.ROBOT && data[0] == TASK_ID.ROBOT.GET_VERSION) {
+                this.robot.version = data[7] << 8 | data[8];
             }
         }
     }
-    
+
     /*************************************************************************
      * Name: handleLocalData
      *
@@ -581,18 +659,18 @@ class Module extends BaseModule {
         //logger.info('checkInitialData genibot');
         // log('handleLocalData genibot');
         // log(data.byteLength)
-        
-        this._onMessage(data);
+
+        //this._onMessage(data);
 
         // this.setLED([255,51,153],0xff)
 
         // const startRobotCMD = new Buffer([0xA3, 0x00, 0x00, 0xC1, 0x0, 0x37, 0x01, 0x04, 0x4D, 0x0, 0x28, 0x3, 0x64, 0x04, 0x4F, 0x0, 0x28, 0x3, 0x64, 0x04, 0x51, 0x0, 0x28, 0x3, 0x64, 0x04, 0x52, 0x0, 0x28, 0x3, 0x64, 0x04, 0x54, 0x0, 0x28, 0x3, 0x64, 0x04, 0x56, 0x0, 0x28, 0x3, 0x64, 0x04, 0x58, 0x0, 0x28, 0x3, 0x64, 0x04, 0x59, 0x0, 0x28, 0x3, 0x64])
         // this.send(startRobotCMD)
-        
-            // window.clearTimeout(this._timeoutID);
-            // this._timeoutID = window.setTimeout(
-            //     () => this._ble.handleDisconnectError(BLEDataStoppedError), 
-            //     BLETimeout); 
+
+        // window.clearTimeout(this._timeoutID);
+        // this._timeoutID = window.setTimeout(
+        //     () => this._ble.handleDisconnectError(BLEDataStoppedError),
+        //     BLETimeout);
 
 
     }
@@ -610,12 +688,12 @@ class Module extends BaseModule {
 
         // this.audiofile.audiodata = 'none';
         // this.audiofile.APPLIED = true;
-        
+
         // this.isSendStartSnd = true;
         //    this.sp.write(sndbuf);
     }
 
-     /*************************************************************************
+    /*************************************************************************
      * Name: disconnect
      *
      * Description:
@@ -625,11 +703,11 @@ class Module extends BaseModule {
 
     disconnect(connector) {
         //logger.info('checkInitialData genibot');
-        log('disconnect genibot');        
+        log('disconnect genibot');
         // 커넥터가 연결해제될 때 호출되는 로직, 스캔 정지 혹은 디바이스 연결 해제시 호출된다.
         this.reset();
         connector.close();
-        this.isSendInitData= false;
+        this.isSendInitData = false;
         this.isConnect = false;
         if (this.sp) {
             delete this.sp;
@@ -647,11 +725,13 @@ class Module extends BaseModule {
     reset() {
         //logger.info('checkInitialData genibot');
         log('reset genibot');
+        this.isDraing = false;
+        this.next_ack = 0;
         // 엔트리 브라우저와의 소켓 연결이 끊어졌을 때 발생하는 로직.
-        this.buttonStatus = {status: 0};
-        this.accelerationSensor = {aX: 0, aY: 0, aZ: 0, tilt: 0};
-        this.lightSensor = {R2: 0, R1: 0, L1: 0, L2: 0};
-        this.arduino = {ain: 0};
+        this.buttonStatus = { status: 0 };
+        this.accelerationSensor = { aX: 0, aY: 0, aZ: 0, tilt: 0 };
+        this.lightSensor = { R2: 0, R1: 0, L1: 0, L2: 0 };
+        this.arduino = { ain: 0 };
 
         // if (this._timeoutID) {
         //             window.clearTimeout(this._timeoutID);
@@ -702,138 +782,251 @@ class Module extends BaseModule {
      * getVersion
      * Use version control to add a new funtion block
      */
-    getVersion () {
+    getVersion() {
         const virtualId = [TASK_ID.ROBOT.GET_VERSION, 0x00, this.robot.id];
         const opCode = [OP_CODE.ROBOT];
         const packageSize = [0x00, 0x07];
         const buildVersion = [0x2];
         const command = [
-            ...virtualId, 
+            ...virtualId,
             ...opCode,
             ...packageSize,
-            ...buildVersion 
+            ...buildVersion,
         ];
         return command;
     }
+
     /**
      * getSensors
      * samplingPeriods: 10 to 100 that is mached to 0.1s to 1.0s
-     * virtualId 0x10: read Oid, turn off Green led      
-     * @param {*} periods 
+     * virtualId 0x10: read Oid, turn off Green led
+     * @param {*} periods
      */
-    getSensors (periods) {        
+    getSensors(periods) {
         const virtualId = [TASK_ID.PERIPHERALS.GET_SENSORS, 0x10, this.robot.id];
         const opCode = [OP_CODE.PERIPHERALS.GET];
         const packageSize = [0x00, 0x07];
         const samplingPeriods = [periods];
         const command = [
-            ...virtualId, 
+            ...virtualId,
             ...opCode,
             ...packageSize,
-            ...samplingPeriods 
+            ...samplingPeriods,
         ];
         return command;
     }
 
-    send (command) {
-        if(!this.isConnected()) return;
-        if(this._busy) return;        
+    /*send(command) {
+        if (!this.isConnected()) {
+            return;
+        }
+        if (this._busy) {
+            return;
+        }
         this._busy = true;
-        // log(command.toString())
+        log("send")
+        log(command)
         this.sp.write(command, (val) => {
             this._busy = false;
         });
+    }*/
+
+    send(command) {
+        if (!this.isConnected()) {
+            return;
+        }
+        // this.sendBuffers.push(...Array(10).fill(command));
+        this.sendBuffers.push(command);
     }
 
     /**
      * Return true if connected to the robot.
      * @return {boolean} - whether the robot is connected.
      */
-    isConnected () {
+    isConnected() {
         //should add other logic if using ble later
         return this.isConnect;
     }
 
-    
+
     /**
      * moveDistance
-     * @param {*} args 
+     * @param {*} args
      */
-    // moveDistance (args) {
-    //     let stepRate =  this.motion.stepRate;
-    //     if(args.DIRECTION == 'forward') {   stepRate *= 1;
-    //     } else {    stepRate *= -1;     }
-    //     return this.startMotionStepsDistance(stepRate, parseInt(args.DISTANCE, 10));
-    // }
+    moveDistance(args) {
+        console.log('HELLO');
+        let stepRate = this.motion.stepRate;
+        if (args.DIRECTION == 'front') {
+            stepRate *= 1;
+        } else {
+            stepRate *= -1;
+        }
+        return this.startMotionStepsDistance(stepRate, parseInt(args.DISTANCE, 10));
+    }
+
+    /**
+     * turnAngle
+     * @param {*} args
+     */
+    turnAngle(args) {
+        let stepRate = this.motion.stepRate;
+        if (args.DIRECTION === 'left') {
+            stepRate *= 1;
+        } else {
+            stepRate *= -1;
+        }
+        return this.startMotionStepsAngle(stepRate, parseInt(args.ANGLE, 10));
+    }
+
+    /**
+     * startMoving
+     * Added SetMotionSteps,  positive or negative sps (steps per seconds)  is from 850 to 1000
+     */
+    startMoving(args) {
+        let velocity1 = parseInt(args.VELOCITY1, 10) * 30;
+        let velocity2 = parseInt(args.VELOCITY2, 10) * 30;
+        if (this.linefollower.action > ACTION_STATE.PAUSE) {
+            this.setLineFollower(false);
+            return this.resolveTimePromise(BLESendInterval);
+        } else {
+            if (velocity1 != 0) {
+                if (velocity1 < 0) {
+                    velocity1 -= 850;
+                } else {
+                    velocity1 += 850;
+                }
+            }
+            if (velocity2 != 0) {
+                if (velocity2 < 0) {
+                    velocity2 -= 850;
+                } else {
+                    velocity2 += 850;
+                }
+            }
+            return this.setContinuousSteps(ACTION_STATE.START, velocity1, velocity2);
+        }
+    }
+
+    /*stopMoving() {
+        if (this.linefollower.action > ACTION_STATE.PAUSE) {
+            this.setLineFollower(false);
+            return new Promise(resolve => {
+                window.setTimeout(() => {
+                    resolve();
+                }, BLESendInterval);
+            });
+        } else {
+            return this.setContinuousSteps(ACTION_STATE.PAUSE);
+        }
+    }*/
+
+    /**
+     * motionGoDistance
+     * Added SetMotionSteps, a value of positive or negative StepRate is from 850 to 1000
+     * @param {*} args
+     */
+    motionGoDistance(args) {
+        let velocity = parseInt(args.VELOCITY, 10) * 30;
+        if (velocity != 0) {
+            if (velocity < 0) {
+                velocity -= 850;
+            } else {
+                velocity += 850;
+            }
+        }
+        return this.startMotionStepsDistance(velocity, args.DISTANCE);
+    }
+
+    /**
+     * motionRotateAngle
+     * Added SetMotionSteps,  positive or negative sps (steps per seconds) is from 850 to 1000
+     * @param {*} args
+     */
+    motionRotateAngle(args) {
+        let velocity = parseInt(args.VELOCITY, 10) * 30;
+        if (velocity != 0) {
+            if (velocity < 0) {
+                velocity -= 850;
+            } else {
+                velocity += 850;
+            }
+        }
+        return this.startMotionStepsAngle(velocity, args.ANGLE);
+    }
+
     /**
      * Mandatory field data format is described as {VirtualId:OpCode:PacketSize:Property}.
      * Data format of VirtualId is described as {TaskId:Reserved:robotId}.
      * Set 00h or FFh to Reserved and robotId field.
-     * When you make GeniBot star network define robotId from 00h to 07h according to the connection link order.    
+     * When you make GeniBot star network define robotId from 00h to 07h according to the connection link order.
      * {None} means that you don’t add a value or some data set in the excluded fields.
      * To set some parameters such as OidCode, VirtualCode, NoteId, Tempo or more, see GeniBot Oid code reference document.
-     * 
+     *
      * Client robot will immediately send a response with the mandatory field data set to host robot.
      */
+
+
     /**
      * @param {number} StepRate - steps per seconds
      * @param {number} Steps - steps
      * @return {Promise} - a Promise that resolves when writing to peripheral.
      */
-    setSingleSteps (StepRate1, Steps1, StepRate2,  Steps2) {
+    setSingleSteps(StepRate1, Steps1, StepRate2, Steps2) {
         const virtualId = [TASK_ID.STEPPERS.SET_SINGLE_STEPS, 0x00, this.robot.id];
         const opCode = [OP_CODE.STEPPERS];
-        const packageSize = [0x00, 0x0F]; 
+        const packageSize = [0x00, 0x0F];
         const actionState = ACTION_STATE.RESUME;
         const steppers = [
             ...convertIntToUint8Array(StepRate1, 2),
-            ...convertIntToUint8Array(Steps1, 2),        
+            ...convertIntToUint8Array(Steps1, 2),
             ...convertIntToUint8Array(StepRate2, 2),
-            ...convertIntToUint8Array(Steps2, 2)
+            ...convertIntToUint8Array(Steps2, 2),
         ];
         const command = [
-            ...virtualId, 
-            ...opCode, 
-            ...packageSize, 
-            ...actionState, 
-            ...steppers, 
+            ...virtualId,
+            ...opCode,
+            ...packageSize,
+            ...actionState,
+            ...steppers,
         ];
         return this.send(command);
     }
-    /**     
-     * @param {*} stepRate 
-     * @param {*} distance 
+
+    /**
+     * @param {*} stepRate
+     * @param {*} distance
      * Added SetMotionSteps, see Programmer's guide.
-     * a. VirtualId{TaskId:Reserved:robotId}:OpCode:PacketSize:ActionState:MotionType:{StepRate:Distance} 
+     * a. VirtualId{TaskId:Reserved:robotId}:OpCode:PacketSize:ActionState:MotionType:{StepRate:Distance}
      * b. VirtualId{TaskId:Reserved:robotId}:OpCode:PacketSize:ActionState:MotionType:{StepRate:Angle}
      * setMotionStepsDistance: to go forward or backward, back and forth motion,
-     * setMotionStepsAngle: to rotate left or right, see Programmer's guide.	
+     * setMotionStepsAngle: to rotate left or right, see Programmer's guide.
      */
-	 setMotionStepsDistance (stepRate, distance) {
+    setMotionStepsDistance(stepRate, distance) {
         const virtualId = [TASK_ID.STEPPERS.SET_MOTION_STEPS, 0x00, this.robot.id];
         const opCode = [OP_CODE.STEPPERS];
         const packageSize = [0x00, 0x0C];
-        const actionState = [ACTION_STATE.RESUME]; 
-        const motionProperty = [0x00];        
+        const actionState = [ACTION_STATE.RESUME];
+        const motionProperty = [0x00];
         const steppers = [
             ...convertIntToUint8Array(stepRate, 2),
             ...convertIntToUint8Array(distance, 2),
         ];
         const command = [
-            ...virtualId, 
+            ...virtualId,
             ...opCode,
-            ...packageSize, 
+            ...packageSize,
             ...actionState,
-			...motionProperty, 
+            ...motionProperty,
             ...steppers,
         ];
         return this.send(command);
     }
-    /**     
-     * @param {*} stepRate 
-     * @param {*} angle 
+
+    /**
+     * @param {*} stepRate
+     * @param {*} angle
      */
-	setMotionStepsAngle (stepRate, angle) {
+    setMotionStepsAngle(stepRate, angle) {
         const virtualId = [TASK_ID.STEPPERS.SET_MOTION_STEPS, 0x00, this.robot.id];
         const opCode = [OP_CODE.STEPPERS];
         const packageSize = [0x00, 0x0C];
@@ -844,192 +1037,213 @@ class Module extends BaseModule {
             ...convertIntToUint8Array(angle, 2),
         ];
         const command = [
-            ...virtualId, 
+            ...virtualId,
             ...opCode,
-            ...packageSize, 
+            ...packageSize,
             ...actionState,
-			...motionProperty, 
+            ...motionProperty,
             ...steppers,
         ];
         return this.send(command);
-    }	
-   /**
-    * setLED:
-    * Each color in rgb space,  see Programmer's guide. 
-    * colorSpace: rgb space
-    * setLedId: Set 03h to Front LED, 01h to Back LED, 02h to Left LED, 00h to Right LED or FFh to four LEDs    
-    * @param {*} color 
-    * @param {*} ledId 
-    */
-    setLED (color, ledId) {
-        const virtualId = [TASK_ID.PERIPHERALS.SET_COLOR_LED, 0x00, this.robot.id];
+    }
+
+    /**
+     * setLED:
+     * Each color in rgb space,  see Programmer's guide.
+     * colorSpace: rgb space
+     * setLedId: Set 03h to Front LED, 01h to Back LED, 02h to Left LED, 00h to Right LED or FFh to four LEDs
+     * @param {*} color
+     * @param {*} ledId
+     */
+    setLED(color, ledId) {
+        const virtualId = [TASK_ID.PERIPHERALS.SET_COLOR_LED, 0xFF, this.robot.id];
         const opCode = [OP_CODE.PERIPHERALS.SET];
         const packageSize = [0x00, 0x0B];
         const colorSpace = [0x01];
-        const colorRGB = [  color[0],  color[1], color[2]]; 
+        const colorRGB = [color[0], color[1], color[2]];
         const setLedId = [(this.robot.version < 7) ? 0xFF : ledId];
         const command = [
-            ...virtualId, 
+            ...virtualId,
             ...opCode,
             ...packageSize,
             ...colorSpace,
-            ...colorRGB, 
-            ...setLedId 
+            ...colorRGB,
+            ...setLedId,
         ];
-        return this.send(command); 
+        log('setLED');
+        log(command);
+        return this.send(command);
     }
-       /**
-    * setLED:
-    * Each color in rgb space,  see Programmer's guide. 
-    * colorSpace: rgb space
-    * setLedId: Set 03h to Front LED, 01h to Back LED, 02h to Left LED, 00h to Right LED or FFh to four LEDs    
-    * @param {*} color 
-    * @param {*} ledId 
-    */
-   setLEDName (colorNameIndex, ledId, brightness) {
+
+    /**
+     * setLED:
+     * Each color in rgb space,  see Programmer's guide.
+     * colorSpace: rgb space
+     * setLedId: Set 03h to Front LED, 01h to Back LED, 02h to Left LED, 00h to Right LED or FFh to four LEDs
+     * @param {*} color
+     * @param {*} ledId
+     */
+    setLEDName(colorNameIndex, ledId, brightness) {
         const virtualId = [TASK_ID.PERIPHERALS.SET_COLOR_LED, 0x00, this.robot.id];
         const opCode = [OP_CODE.PERIPHERALS.SET];
         const packageSize = [0x00, 0x0B];
         const colorSpace = [0x02];
-        const colorRGB = [  0x0,  colorNameIndex, brightness]; 
+        const colorRGB = [0x0, colorNameIndex, brightness];
         const setLedId = [(this.robot.version < 7) ? 0xFF : ledId];
         const command = [
-            ...virtualId, 
+            ...virtualId,
             ...opCode,
             ...packageSize,
             ...colorSpace,
-            ...colorRGB, 
-            ...setLedId 
+            ...colorRGB,
+            ...setLedId,
         ];
-        return this.send(command); 
+        return this.send(command);
     }
-   /**
-    * @param {*} stepperActionState 
-    * @param {*} speed1 
-    * @param {*} speed2 
-    * setContinuousSteps:
-    * To make a contiuous linear or rotational motion,
-    */
-    setContinuousSteps (stepperActionState, speed1, speed2) {
+
+    /**
+     * @param {*} stepperActionState
+     * @param {*} speed1
+     * @param {*} speed2
+     * setContinuousSteps:
+     * To make a contiuous linear or rotational motion,
+     */
+    setContinuousSteps(stepperActionState, speed1, speed2) {
         const virtualId = [TASK_ID.STEPPERS.SET_CONTINUOUS_STEPS, 0x00, this.robot.id];
         const opCode = [OP_CODE.STEPPERS];
         const packageSize = [0x00, 0x0B];
         const actionState = [stepperActionState];
         const steppers = [
             ...convertIntToUint8Array(speed1, 2),
-            ...convertIntToUint8Array(speed2, 2)
+            ...convertIntToUint8Array(speed2, 2),
         ];
         const command = [
-            ...virtualId, 
+            ...virtualId,
             ...opCode,
             ...packageSize,
             ...actionState,
-            ...steppers 
+            ...steppers,
         ];
         return this.send(command);
     }
-   /**    
-    * @param {*} isStartAction 
-    * setLineFollower:
-    * Start line follower with pid motion control in the robot,
-    */
-    setLineFollower (isStartAction) {
+
+    /**
+     * @param {*} isStartAction
+     * setLineFollower:
+     * Start line follower with pid motion control in the robot,
+     */
+    setLineFollower(isStartAction) {
         const virtualId = [TASK_ID.CARDS.SET_LINE_FOLLOWER, 0x00, this.robot.id];
         const opCode = [OP_CODE.CARDS];
         const packageSize = [0x00, 0x07];
         const actionState = [isStartAction ? ACTION_STATE.START : ACTION_STATE.PAUSE];
         const command = [
-            ...virtualId, 
+            ...virtualId,
             ...opCode,
             ...packageSize,
             ...actionState,
         ];
         return this.send(command);
     }
-   /**
-    * @param {*} instrument 
-    * setInstrument:
-    * Configure piano, flute or strting
-    */
-    setInstrument (instrument) {    this.music.instrument = instrument;    }
-   /**
-    * setTempo :
-    * Configure tempo from 88 to 140    
-    * @param {*} tempo 
-    */
-    setTempo (tempo) {  this.music.tempo = tempo;      }
-   /**    
-    * @param {*} note 
-    * @param {*} beatId 
-    * setMusicNotes :
-    * Music notes can be constructed in array set as {{NoteCode:InstruementId:Reserved:NoteId:Tempo}, {}, {}  ...}
-    * musicNotes: it is spefified with instrument address of which is from 1100 to 1600
-    * instrumentId: piano, flute, string
-    * beatId: NoteId from whole to sixteenth
-    * tempo: it is from 88 to 140
-    */
-    setMusicNotes (note, beatId, key) {
-        let instrumentId = 0x00;         
+
+    /**
+     * @param {*} instrument
+     * setInstrument:
+     * Configure piano, flute or strting
+     */
+    setInstrument(instrument) {
+        this.music.instrument = instrument;
+    }
+
+    /**
+     * setTempo :
+     * Configure tempo from 88 to 140
+     * @param {*} tempo
+     */
+    setTempo(tempo) {
+        this.music.tempo = tempo;
+    }
+
+    /**
+     * @param {*} note
+     * @param {*} beatId
+     * setMusicNotes :
+     * Music notes can be constructed in array set as {{NoteCode:InstruementId:Reserved:NoteId:Tempo}, {}, {}  ...}
+     * musicNotes: it is spefified with instrument address of which is from 1100 to 1600
+     * instrumentId: piano, flute, string
+     * beatId: NoteId from whole to sixteenth
+     * tempo: it is from 88 to 140
+     */
+    setMusicNotes(note, beatId, key) {
+        let instrumentId = 0x00;
         let noteIndex = (key >= 0) ? key : NOTES_CODES[note];
         switch (this.music.instrument) {
-            case 'piano':   instrumentId = 0x00;  break;
-            case 'flute':   instrumentId = 0x01;  break;
-            case 'string':  instrumentId = 0x02;  break;
+        case 'piano':
+            instrumentId = 0x00;
+            break;
+        case 'flute':
+            instrumentId = 0x01;
+            break;
+        case 'string':
+            instrumentId = 0x02;
+            break;
         }
         const virtualId = [TASK_ID.CARDS.SET_MUSIC_NOTES, 0x00, this.robot.id];
         const opCode = [OP_CODE.CARDS];
         const packageSize = [0x00, 0x0D];
         const actionState = [ACTION_STATE.START];
         const musicNotes = [
-                    ...convertIntToUint8Array((1100 + instrumentId * 20 + noteIndex), 2), 
-                    instrumentId, 
-                    0x00, 
-                    beatId, 
-                    parseInt(this.music.tempo, 10)
+            ...convertIntToUint8Array((1100 + instrumentId * 20 + noteIndex), 2),
+            instrumentId,
+            0x00,
+            beatId,
+            parseInt(this.music.tempo, 10),
         ];
         const command = [
-            ...virtualId, 
+            ...virtualId,
             ...opCode,
             ...packageSize,
             ...actionState,
-            ...musicNotes
+            ...musicNotes,
         ];
         return this.send(command);
     }
+
     /**
      * setSpeakerVolume: from 1 (minimum) to 10 (maximum)
-     * @param {*} volume 
+     * @param {*} volume
      */
-    setSpeakerVolume (volume) {
+    setSpeakerVolume(volume) {
         const virtualId = [TASK_ID.PERIPHERALS.SET_SPEAKER_VOLUME, 0x00, this.robot.id];
         const opCode = [OP_CODE.PERIPHERALS.SET];
         const packageSize = [0x00, 0x07];
-        const setVolume =[parseInt(volume, 10)];
+        const setVolume = [parseInt(volume, 10)];
         const command = [
-            ...virtualId, 
+            ...virtualId,
             ...opCode,
             ...packageSize,
-            ...setVolume
+            ...setVolume,
         ];
         return this.send(command);
     }
-    /**
-     * countNoteLength 
-     * @param {*} noteId 
-     */
-    countNoteLength (noteId) {
-        const noteBPM = [240, 120, 180, 60, 90, 30, 45, 15]; // Beat per miniutes
-        return noteBPM[noteId] ? (noteBPM[noteId] / this.music.tempo) : 2.4; // Duration in seconds
-    }
+
     /**
      * countNoteLength
-     * @param {*} noteId 
+     * @param {*} noteId
      */
-    countNoteLength (noteId) {
+    countNoteLength(noteId) {
         const noteBPM = [240, 120, 180, 60, 90, 30, 45, 15]; // Beat per miniutes
         return noteBPM[noteId] ? (noteBPM[noteId] / this.music.tempo) : 2.4; // Duration in seconds
     }
 
+    /**
+     * countNoteLength
+     * @param {*} noteId
+     */
+    countNoteLength(noteId) {
+        const noteBPM = [240, 120, 180, 60, 90, 30, 45, 15]; // Beat per miniutes
+        return noteBPM[noteId] ? (noteBPM[noteId] / this.music.tempo) : 2.4; // Duration in seconds
+    }
 
 
     /////GENI BLOCK CLASS
@@ -1038,41 +1252,188 @@ class Module extends BaseModule {
      * resolveVersionError
      */
     resolveVersionError() {
-        // return new Promise((resolve, reject) => {                             
+        // return new Promise((resolve, reject) => {
         //     this.timer =   setTimeout(() => {
         //         // alert(message);
         //         let message = "GeniBot firmware verion is " + this.peripheral.robot.version+ ". Please update the robot to run this block.";
         //         switch(formatMessage.setup().locale) {
         //             case 'ko' : message= "지니봇 펌웨어 버전 (" + this.peripheral.robot.version + ") 입니다. 올바른 작동을 위해 새 펌웨어로 업데이트하세요."; break;
-        //         }                       
+        //         }
         //         resolve(message);
         //     }, BLESendInterval);
         // });
-        log("GeniBot firmware verion is " + this.peripheral.robot.version+ ". Please update the robot to run this block.")
+        log('GeniBot firmware verion is ' + this.peripheral.robot.version + '. Please update the robot to run this block.');
         return false;
     }
+
     /**
      * startMotionStepsDistance
      * Added SetMotionSteps{linear motion}, see Programmer's guide
-     * @param {*} stepRate 
-     * @param {*} distance 
+     * @param {*} stepRate
+     * @param {*} distance
      */
-    // startMotionStepsDistance (stepRate, distance) {        
-    //     if(this.linefollower.action > ACTION_STATE.PAUSE) {
-    //             this.setLineFollower(false);
-    //     } else {    
-    //             distance = MathUtil.clamp(distance, GenibotDistanceLimit.MIN, GenibotDistanceLimit.MAX);
-    //             this.setMotionStepsDistance(stepRate, distance);
-    //     }        
-    //     // Stepping time rate = -0.01 * stepRate + 11, refer to Stepper gear ratio 1:50 at 1000sps
-    //     let stepTime = (distance * this.motion.distanceMultiplier / (Math.abs(stepRate) / (Math.abs(stepRate) * -0.01 + 11)))  * 1000;
-    //     console.log('Stepping time in ms', stepTime);
-    //     if(this.peripheral.robot.version < 7) {
-    //         return this.resolveVersionError();
-    //     }
-    //     return this.peripheral.resolveTimePromise(stepTime);
-    // }
+    startMotionStepsDistance(stepRate, distance) {
+        if (this.linefollower.action > ACTION_STATE.PAUSE) {
+            this.setLineFollower(false);
+        } else {
+            log('setMotionStepsDistance');
+            distance = MathUtil.clamp(distance, GenibotDistanceLimit.MIN, GenibotDistanceLimit.MAX);
+            this.setMotionStepsDistance(stepRate, distance);
+        }
+        // Stepping time rate = -0.01 * stepRate + 11, refer to Stepper gear ratio 1:50 at 1000sps
+        let stepTime = (distance * this.motion.distanceMultiplier / (Math.abs(stepRate) / (Math.abs(stepRate) * -0.01 + 11))) * 1000;
+        console.log('Stepping time in ms', stepTime);
+        /*if (this.robot.version < 7) {
+            return this.resolveVersionError();
+        }*/
+        return this.resolveTimePromise(stepTime);
+    }
+
+    /**
+     * startMotionStepsAngle
+     * Added SetMotionSteps{rotation}, see Programmer's guide
+     * @param {*} stepRate
+     * @param {*} angle
+     */
+    startMotionStepsAngle(stepRate, angle) {
+        if (this.linefollower.action > ACTION_STATE.PAUSE) {
+            this.setLineFollower(false);
+        } else {
+            angle = MathUtil.clamp(angle, GenibotAngleLimit.MIN, GenibotAngleLimit.MAX);
+            this.setMotionStepsAngle(stepRate, angle);
+        }
+        // Stepping time rate = -0.01 * stepRate + 11, refer to Stepper gear ratio 1:50 at 1000sps
+        let stepTime = (angle * this.motion.angleMultiplier / (Math.abs(stepRate) / (Math.abs(stepRate) * -0.01 + 11))) * 1000;
+        console.log('Stepping time in ms', stepTime);
+        /*if(this.robot.version < 7) {
+            return this.resolveVersionError();
+        }*/
+        return this.resolveTimePromise(stepTime);
+    }
 
 }
 
 module.exports = new Module();
+
+class MathUtil {
+    /**
+     * Convert a value from degrees to radians.
+     * @param {!number} deg Value in degrees.
+     * @return {!number} Equivalent value in radians.
+     */
+    static degToRad(deg) {
+        return deg * Math.PI / 180;
+    }
+
+    /**
+     * Convert a value from radians to degrees.
+     * @param {!number} rad Value in radians.
+     * @return {!number} Equivalent value in degrees.
+     */
+    static radToDeg(rad) {
+        return rad * 180 / Math.PI;
+    }
+
+    /**
+     * Clamp a number between two limits.
+     * If n < min, return min. If n > max, return max. Else, return n.
+     * @param {!number} n Number to clamp.
+     * @param {!number} min Minimum limit.
+     * @param {!number} max Maximum limit.
+     * @return {!number} Value of n clamped to min and max.
+     */
+    static clamp(n, min, max) {
+        return Math.min(Math.max(n, min), max);
+    }
+
+    /**
+     * Keep a number between two limits, wrapping "extra" into the range.
+     * e.g., wrapClamp(7, 1, 5) == 2
+     * wrapClamp(0, 1, 5) == 5
+     * wrapClamp(-11, -10, 6) == 6, etc.
+     * @param {!number} n Number to wrap.
+     * @param {!number} min Minimum limit.
+     * @param {!number} max Maximum limit.
+     * @return {!number} Value of n wrapped between min and max.
+     */
+    static wrapClamp(n, min, max) {
+        const range = (max - min) + 1;
+        return n - (Math.floor((n - min) / range) * range);
+    }
+
+
+    /**
+     * Convert a value from tan function in degrees.
+     * @param {!number} angle in degrees
+     * @return {!number} Correct tan value
+     */
+    static tan(angle) {
+        angle = angle % 360;
+        switch (angle) {
+        case -270:
+        case 90:
+            return Infinity;
+        case -90:
+        case 270:
+            return -Infinity;
+        default:
+            return parseFloat(Math.tan((Math.PI * angle) / 180).toFixed(10));
+        }
+    }
+
+    /**
+     * Given an array of unique numbers,
+     * returns a reduced array such that each element of the reduced array
+     * represents the position of that element in a sorted version of the
+     * original array.
+     * E.g. [5, 19. 13, 1] => [1, 3, 2, 0]
+     * @param {Array<number>} elts The elements to sort and reduce
+     * @return {Array<number>} The array of reduced orderings
+     */
+    static reducedSortOrdering(elts) {
+        const sorted = elts.slice(0).sort((a, b) => a - b);
+        return elts.map(e => sorted.indexOf(e));
+    }
+
+    /**
+     * Return a random number given an inclusive range and a number in that
+     * range that should be excluded.
+     *
+     * For instance, (1, 5, 3) will only pick 1, 2, 4, or 5 (with equal
+     * probability)
+     *
+     * @param {number} lower - The lower bound (inlcusive)
+     * @param {number} upper - The upper bound (inclusive), such that lower <= upper
+     * @param {number} excluded - The number to exclude (MUST be in the range)
+     * @return {number} A random integer in the range [lower, upper] that is not "excluded"
+     */
+    static inclusiveRandIntWithout(lower, upper, excluded) {
+        // Note that subtraction is the number of items in the
+        // inclusive range [lower, upper] minus 1 already
+        // (e.g. in the set {3, 4, 5}, 5 - 3 = 2).
+        const possibleOptions = upper - lower;
+
+        const randInt = lower + Math.floor(Math.random() * possibleOptions);
+        if (randInt >= excluded) {
+            return randInt + 1;
+        }
+
+        return randInt;
+    }
+
+    /**
+     * Scales a number from one range to another.
+     * @param {number} i number to be scaled
+     * @param {number} iMin input range minimum
+     * @param {number} iMax input range maximum
+     * @param {number} oMin output range minimum
+     * @param {number} oMax output range maximum
+     * @return {number} scaled number
+     */
+    static scale(i, iMin, iMax, oMin, oMax) {
+        const p = (i - iMin) / (iMax - iMin);
+        return (p * (oMax - oMin)) + oMin;
+    }
+}
+
+// module.exports = MathUtil;
