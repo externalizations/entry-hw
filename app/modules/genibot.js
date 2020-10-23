@@ -3,7 +3,7 @@ const atob = require('atob');
 
 const fs = require('fs');
 const log = (val) => {
-    if (Array.isArray(val)) {
+    /*if (Array.isArray(val)) {
         fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `[${val.toString()}]\n`, function(err) {
             if (err) {
                 throw err;
@@ -17,16 +17,16 @@ const log = (val) => {
             }
             // log('Saved!');/
         });
-    }
+    }*/
 
 };
 const log2 = (val) => {
-    fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `${val},`, function(err) {
+    /*fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `${val},`, function(err) {
         if (err) {
             throw err;
         }
         // log('Saved!');/
-    });
+    });*/
 };
 // import rendererConsole from './core/rendererConsole';
 // import rendererConsole from '../src/main/core/rendererConsole';
