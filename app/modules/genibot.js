@@ -3,7 +3,7 @@ const atob = require('atob');
 
 const fs = require('fs');
 const log = (val) => {
-    /*if (Array.isArray(val)) {
+    if (Array.isArray(val)) {
         fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `[${val.toString()}]\n`, function(err) {
             if (err) {
                 throw err;
@@ -17,16 +17,16 @@ const log = (val) => {
             }
             // log('Saved!');/
         });
-    }*/
+    }
 
 };
 const log2 = (val) => {
-    /*fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `${val},`, function(err) {
+    fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `${val},`, function(err) {
         if (err) {
             throw err;
         }
         // log('Saved!');/
-    });*/
+    });
 };
 // import rendererConsole from './core/rendererConsole';
 // import rendererConsole from '../src/main/core/rendererConsole';
@@ -336,27 +336,13 @@ class Module extends BaseModule {
         if (!this.isSendInitData) {
             this.isConnect = true;
 
-            // const startRobotCMD =  this.getSensors(this.robot.samplingPeriods);
-            // const startRobotCMD =  this.getSensors(100);
 
-            // const startRobotCMD = new Buffer([0xA3, 0x00, 0x00, 0xC1, 0x0, 0x37, 0x01, 0x04, 0x4D, 0x0, 0x28, 0x3, 0x64, 0x04, 0x4F, 0x0, 0x28, 0x3, 0x64, 0x04, 0x51, 0x0, 0x28, 0x3, 0x64, 0x04, 0x52, 0x0, 0x28, 0x3, 0x64, 0x04, 0x54, 0x0, 0x28, 0x3, 0x64, 0x04, 0x56, 0x0, 0x28, 0x3, 0x64, 0x04, 0x58, 0x0, 0x28, 0x3, 0x64, 0x04, 0x59, 0x0, 0x28, 0x3, 0x64])
-            // this._busy = true;
-            // this.sp.write(startRobotCMD, (val) => {
-            //     this._busy = false;
-            //     this.isSendInitData = true;
-            // });
-            // this.send(startRobotCMD)
-
-            // const verCmd = this.getVersion();
-            // this.send(verCmd);
-
-
-            //===============================
 
             const startRobot = new Promise(resolve => {
                 // rendererConsole.log(`I am finally connected`);
                 console.log('Start the robot.');
-                const sensorCmd = this.getSensors(this.robot.samplingPeriods);
+                // const sensorCmd = this.getSensors(this.robot.samplingPeriods);
+                const sensorCmd = new Buffer([0xA2, 0x00, 0xBF, 0xA9, 0x00, 0x07, 0x00])
                 this.sendInit(sensorCmd);
 
                 setTimeout(() => {
@@ -364,8 +350,11 @@ class Module extends BaseModule {
                 }, BLETimeout);
             });
             startRobot.finally(() => {
-                const verCmd = this.getVersion();
-                this.send(verCmd);
+                const sensorCmd = this.getSensors(this.robot.samplingPeriods);
+                this.sendInit(sensorCmd);
+                this.isSendInitData = true;
+                /*const verCmd = this.getVersion();
+                this.send(verCmd);*/
             });
 
         }
@@ -428,25 +417,33 @@ class Module extends BaseModule {
      *
      * Returned Value :
      *************************************************************************/
-    requestRemoteData(handler) { //sendtobrowser
+    async requestRemoteData(handler) { //sendtobrowser
         // handler.write('OIDCODE', this.oidCode.decimal);
         // handler.write('ACC_TILT', this.accelerationSensor);
         // const val = this.buttonStatus.status > 0 ? "1":"0";
         // this.buttonStatus.status = 0;
         // handler.write("BUTTON", val);
         // const val = this.buttonStatus.status > 0 ? '1' : '0';
-        if (this.data && this.data.length > 0) {
-            // this.buttonStatus.status = 0;
-            handler.write('BUTTON', this.data);
+        // handler.write("log",this.data);
+        // if (this.buttonStatus.status > 0) {
+        if (this.buttonStatus.status > 0) {
+            this.buttonStatus.status = -1;
+            // handler.write("log",this.data);
+            // handler.write('BUTTON', this.data);
+            handler.write('BUTTON', true);
+
             // this.data = [];
             // this.countButton = 0;
-            // await this.sleep(10000);
+            // await this.sleep(100);
+        }else{
+            handler.write('BUTTON', false);
         }
 
-        if(this.logger.length > 0){
+        /*if(this.logger.length > 0){
             handler.write('LOGGER', {list:this.logger});
             this.logger =[];
-        }
+        }*/
+
         // this.countButton++;{
         /*
         if (this.first) {
