@@ -1,5 +1,9 @@
 const BaseModule = require('./baseModule');
-const atob = require('atob');
+// const atob = require('atob');
+
+const atob = (str) => {
+    return Buffer.from(str, 'base64').toString('binary');
+}
 
 // const fs = require('fs');
 const log = (val) => {
