@@ -306,7 +306,6 @@ class Module extends BaseModule {
         //process.exit();
         // 엔트리 브라우저와 연결되었을때 호출됨
         log('init genibot');
-
         //logger.info('init genibot');
     }
 
@@ -340,27 +339,25 @@ class Module extends BaseModule {
         }
         if (!this.isSendInitData) {
             this.isConnect = true;
-            const sensorCmd = new Buffer([0xA2, 0x00, 0xBF, 0xA9, 0x00, 0x07, 0x00])
-            this.sendInit(sensorCmd);
 
-            // const startRobot = new Promise(resolve => {
-            //     // rendererConsole.log(`I am finally connected`);
-            //     console.log('Start the robot.');
-            //     // const sensorCmd = this.getSensors(this.robot.samplingPeriods);
-            //     const sensorCmd = new Buffer([0xA2, 0x00, 0xBF, 0xA9, 0x00, 0x07, 0x00])
-            //     this.sendInit(sensorCmd);
-            //
-            //     setTimeout(() => {
-            //         resolve();
-            //     }, BLETimeout);
-            // });
-            // startRobot.finally(() => {
-            //     const sensorCmd = this.getSensors(this.robot.samplingPeriods);
-            //     this.sendInit(sensorCmd);
-            //     this.isSendInitData = true;
-            //     /*const verCmd = this.getVersion();
-            //     this.send(verCmd);*/
-            // });
+            const startRobot = new Promise(resolve => {
+                // rendererConsole.log(`I am finally connected`);
+                console.log('Start the robot.');
+                // const sensorCmd = this.getSensors(this.robot.samplingPeriods);
+                const sensorCmd = new Buffer([0xA2, 0x00, 0xBF, 0xA9, 0x00, 0x07, 0x00])
+                this.sendInit(sensorCmd);
+
+                setTimeout(() => {
+                    resolve();
+                }, BLETimeout);
+            });
+            startRobot.finally(() => {
+                const sensorCmd = this.getSensors(this.robot.samplingPeriods);
+                this.sendInit(sensorCmd);
+                // this.isSendInitData = true;
+                /*const verCmd = this.getVersion();
+                this.send(verCmd);*/
+            });
 
         }
 
@@ -376,15 +373,10 @@ class Module extends BaseModule {
 
         log('checkInitialData genibot');
         log(`isSendInitData ${this.isSendInitData}`);
-        if(data[0] == 0xA2 && data[1] == 0x00&&data[2] == 0xBF&&data[3] == 0xA9&&data[4] == 0x00&&data[5] == 0x07){
-            this.isSendInitData = true;
-
-            // return true;
-        }
-        /*this._busy = true;
+        this._busy = true;
         this.sp.write(this.getVersion(), (error) => {
             this._busy = false;
-            this.isSendInitData = true;
+            // this.isSendInitData = true;
             log('getVersion');
             if (!error) {
                 const return_data = this.sp.read();
@@ -392,7 +384,7 @@ class Module extends BaseModule {
                 log(return_data);
 
             }
-        });*/
+        });
         // this.send(this.getVersion(),(e)=>{log("getVersion");log(e)})
         log(data);
         log('===========');
@@ -449,10 +441,10 @@ class Module extends BaseModule {
             handler.write('BUTTON', false);
         }
 
-        if(this.logger.length > 0){
+        /*if(this.logger.length > 0){
             handler.write('LOGGER', {list:this.logger});
             this.logger =[];
-        }
+        }*/
 
         // this.countButton++;{
         /*
