@@ -8,14 +8,14 @@ const atob = (str) => {
 // const fs = require('fs');
 const log = (val) => {
     // if (Array.isArray(val)) {
-    //     fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `[${val.toString()}]\n`, function(err) {
+    //     fs.appendFile('C:\\Users\\GyeDan\\Projects\\entry\\message.txt', `[${val.toString()}]\n`, function(err) {
     //         if (err) {
     //             throw err;
     //         }
     //         // log('Saved!');/
     //     });
     // } else {
-    //     fs.appendFile('C:\\Users\\GyeDan\\Documents\\CPY_SAVES\\message.txt', `${val}\n`, function(err) {
+    //     fs.appendFile('C:\\Users\\GyeDan\\Projects\\entry\\message.txt', `${val}\n`, function(err) {
     //         if (err) {
     //             throw err;
     //         }
@@ -360,6 +360,7 @@ class Module extends BaseModule {
             });
 
         }
+        this.next_ack = 0;
 
         // 최초 연결시도시 디바이스에 보낼 데이터. checkInitialData 가 선언되어있다면 필수
 
@@ -373,7 +374,7 @@ class Module extends BaseModule {
 
         log('checkInitialData genibot');
         log(`isSendInitData ${this.isSendInitData}`);
-        this._busy = true;
+        /*this._busy = true;
         this.sp.write(this.getVersion(), (error) => {
             this._busy = false;
             // this.isSendInitData = true;
@@ -384,7 +385,7 @@ class Module extends BaseModule {
                 log(return_data);
 
             }
-        });
+        });*/
         // this.send(this.getVersion(),(e)=>{log("getVersion");log(e)})
         log(data);
         log('===========');
@@ -441,10 +442,10 @@ class Module extends BaseModule {
             handler.write('BUTTON', false);
         }
 
-        /*if(this.logger.length > 0){
+        if(this.logger.length > 0){
             handler.write('LOGGER', {list:this.logger});
             this.logger =[];
-        }*/
+        }
 
         // this.countButton++;{
         /*
@@ -507,7 +508,7 @@ class Module extends BaseModule {
      *
      * Returned Value :
      *************************************************************************/
-    handleRemoteData(handler) {
+    async handleRemoteData(handler) {
 
         //logger.info('checkInitialData genibot');
         // log('handleRemoteData genibot');
@@ -531,7 +532,8 @@ class Module extends BaseModule {
         if (handler.e('SET_LED_COLOR_NAME')) {
             const args = handler.read('SET_LED_COLOR_NAME');
             if (this.isValidACK(args['ACK'])) {
-                log('setLedColorName');
+                // log('setLedColorName');
+                this.logger.push(`set ledColorName ${args.LED} -${args.COLOR_NAME} -${args.COLOR_BRIGHTNESS} -`)
                 this.setLedColorName(args);
             }
         }
@@ -555,8 +557,9 @@ class Module extends BaseModule {
             const args = handler.read('MOVE_DISTANCE');
             if (this.isValidACK(args['ACK'])) {
                 // const direction = handler.read('DIRECTION')
-                console.log('args MOVE_DISTANCE');
-                this.cmd = { 'MOVE_DISTANCE': args };
+                //console.log('args MOVE_DISTANCE');
+                this.logger.push('args MOVE_DISTANCE '+this.motion.stepRate);
+                //this.cmd = { 'MOVE_DISTANCE': args };
                 this.moveDistance(args);
             }
         }
@@ -579,8 +582,10 @@ class Module extends BaseModule {
 
         if (handler.e('SET_ROBOT_SPEED_ITEM')) {
             const args = handler.read('SET_ROBOT_SPEED_ITEM');
+            //this.logger.push('args SET_ROBOT_SPEED_ITEM '+args['ACK'] +' hw ack: '+this.next_ack);
             if (this.isValidACK(args['ACK'])) {
-                this.setRobotSpeedItem();
+                let a =  await this.setRobotSpeedItem(args);
+                this.logger.push('args SET_ROBOT_SPEED_ITEM2 - '+ a);
             }
         }
 
@@ -594,6 +599,7 @@ class Module extends BaseModule {
         if (handler.e('MOTION_ROTATE_ANGLE')) {
             const args = handler.read('MOTION_ROTATE_ANGLE');
             if (this.isValidACK(args['ACK'])) {
+                this.logger.push('args MOVE_DISTANCE '+args.VELOCITY +' '+args.ANGLE);
                 this.motionRotateAngle(args);
             }
         }
@@ -997,8 +1003,14 @@ class Module extends BaseModule {
      * setRobotSpeedItem
      * @param {*} args
      */
-    setRobotSpeedItem(args) {
+    async setRobotSpeedItem(args) {
+        if(!args.SPEED)
+            return
+
         let speed = STEPPER_RATE.NORMAL;
+        // let speed = STEPPER_RATE.FAST;
+        // let speed = null;
+
         switch (args.SPEED) {
         case 'slow':
             speed = STEPPER_RATE.SLOW;
@@ -1010,7 +1022,10 @@ class Module extends BaseModule {
             speed = STEPPER_RATE.FAST;
             break;
         }
+        // if(speed !=null)
         this.motion.stepRate = speed;
+
+        return this.motion.stepRate
     }
 
     /**
@@ -1019,7 +1034,8 @@ class Module extends BaseModule {
      */
     moveDistance(args) {
         console.log('HELLO');
-        let stepRate = this.motion.stepRate;
+        // let stepRate = this.motion.stepRate;
+        let stepRate =  this.motion.stepRate;
         if (args.DIRECTION == 'front') {
             stepRate *= 1;
         } else {
@@ -1144,12 +1160,12 @@ class Module extends BaseModule {
             'light pink': 0x9,
         };
         const ledIdIndex = { 'left': 0x02, 'right': 0x00, 'front': 0x03, 'back': 0x01, 'all': 0xFF };
-        let colorNameIndex = indexOfColorName['white'];
+        let colorNameIndex = indexOfColorName[args.COLOR_NAME];
         // let colorNameIndex = indexOfColorName[args.COLOR_NAME];
         // let colorNameIndex = 0x0E;
         // log('colorNameIndex'+colorNameIndex)
         let ledId = ledIdIndex[args.LED];
-        let brightness = MathUtil.clamp(Number(args.COLOR_BRIGHTNESS), 0, 100);
+        let brightness = MathUtil.clamp(Number(args.COLOR_BRIGHTNESS), 1, 100);
         this.setLEDName(colorNameIndex, ledId, brightness);
         if (ledId != 0xFF && this.robot.version < 7) {
             return this.resolveVersionError();
@@ -1543,7 +1559,7 @@ class Module extends BaseModule {
         if (this.linefollower.action > ACTION_STATE.PAUSE) {
             this.setLineFollower(false);
         } else {
-            log('setMotionStepsDistance');
+            log('setMotionStepsDistance'+distance);
             distance = MathUtil.clamp(distance, GenibotDistanceLimit.MIN, GenibotDistanceLimit.MAX);
             this.setMotionStepsDistance(stepRate, distance);
         }
