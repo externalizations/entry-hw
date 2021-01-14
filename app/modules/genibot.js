@@ -1219,7 +1219,7 @@ class Module extends BaseModule {
         log('noteId' + noteId);
         log('args.NOTE' + args.NOTE);
         this.setMusicNotes(args.NOTE, noteId, -1);
-        return this.resolveTimePromise((this.countNoteLength(noteId) * 1000) + BLESendInterval);
+        return this.resolveTimePromise((this.countNoteLength(noteId) * 1000) + 500);
     }
 
     /**
@@ -1506,14 +1506,14 @@ class Module extends BaseModule {
         return noteBPM[noteId] ? (noteBPM[noteId] / this.music.tempo) : 2.4; // Duration in seconds
     }
 
-    /**
-     * countNoteLength
-     * @param {*} noteId
-     */
-    countNoteLength(noteId) {
-        const noteBPM = [240, 120, 180, 60, 90, 30, 45, 15]; // Beat per miniutes
-        return noteBPM[noteId] ? (noteBPM[noteId] / this.music.tempo) : 2.4; // Duration in seconds
-    }
+    // /**
+    //  * countNoteLength
+    //  * @param {*} noteId
+    //  */
+    // countNoteLength(noteId) {
+    //     const noteBPM = [240, 120, 180, 60, 90, 30, 45, 15]; // Beat per miniutes
+    //     return noteBPM[noteId] ? (noteBPM[noteId] / this.music.tempo) : 2.4; // Duration in seconds
+    // }
 
 
     /////GENI BLOCK CLASS
