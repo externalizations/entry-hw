@@ -287,7 +287,7 @@ class Module extends BaseModule {
         // this.robot = { version: 1, id: 0x0, samplingPeriods: 0x19 };
         this.music = {
             instrument: 'piano', // Default instrument 'piano'
-            tempo: 100,
+            tempo: 120,
         };
 
 
@@ -558,7 +558,7 @@ class Module extends BaseModule {
             if (this.isValidACK(args['ACK'])) {
                 // const direction = handler.read('DIRECTION')
                 //console.log('args MOVE_DISTANCE');
-                this.logger.push('args MOVE_DISTANCE '+this.motion.stepRate);
+                //this.logger.push('args MOVE_DISTANCE '+this.motion.stepRate);
                 //this.cmd = { 'MOVE_DISTANCE': args };
                 this.moveDistance(args);
             }
@@ -699,23 +699,48 @@ class Module extends BaseModule {
         //         }
         //     });
         // }
-        var self = this;
+        // var self = this;
+        if (this.sendBuffers.length > 0) {
+            // this.sp.write(this.sendBuffers.shift());
+            // this.sendBuffers =[]
 
-        if (!this.isDraing && this.sendBuffers.length > 0) {
-            this.isDraing = true;
-            const cmd = this.sendBuffers.shift();
-            log('isDraing[' + cmd + '] left:' + this.sendBuffers.length);
-            this.sp.write(cmd, function() {
-                if (self.sp) {
-                    self.sp.drain(function() {
-                        setTimeout(function() {
-                            self.isDraing = false;
-                            log('DRAINING FALSE');
-                        }, 1000);
-                    });
+            this.sp.write(this.sendBuffers.shift(), () => {
+                if (this.sp) {
+                    this.isDraing = false;
+                    // this.sp.drain(() => {
+                    //     this.isDraing = false;
+                    // });
                 }
             });
         }
+        // if (!this.isDraing && this.sendBuffers.length > 0) {
+        //     this.isDraing = true;
+        //     const cmd = this.sendBuffers.shift();
+            // const list = this.sendBuffers.shift();
+            // const cmd = list[0]
+            // const timeout = list[1]
+            // log('isDraing[' + cmd + '] left:' + this.sendBuffers.length);
+            // this.sp.write(cmd, function() {
+            //     if (self.sp) {
+            //         self.sp.drain(function() {
+            //             self.isDraing = false;
+            //             // setTimeout(function() {
+            //             //     self.isDraing = false;
+            //             //     // log('DRAINING FALSE');
+            //             // }, 2);
+            //         });
+            //     }
+            // });
+            // if (this.sendBuffers.length > 0) {
+            //     this.sp.write(this.sendBuffers.shift(), () => {
+            //         if (this.sp) {
+            //             this.sp.drain(() => {
+            //                 this.isDraing = false;
+            //             });
+            //         }
+            //     });
+            // }
+        // }
         // this.sp.write(new Buffer([0xC1, 0xFF, 0x00, 0xC2, 0x00, 0x0B, 0x02, 0xFF, 0xFF, 0x32, 0xFF]))
 
 
@@ -990,6 +1015,14 @@ class Module extends BaseModule {
         this.sendBuffers.push(command);
     }
 
+    // send(command,stepTime) {
+    //     if (!this.isConnected()) {
+    //         return;
+    //     }
+    //     // this.sendBuffers.push(...Array(10).fill(command));
+    //     this.sendBuffers.push([command,stepTime]);
+    // }
+
     /**
      * Return true if connected to the robot.
      * @return {boolean} - whether the robot is connected.
@@ -1033,7 +1066,7 @@ class Module extends BaseModule {
      * @param {*} args
      */
     moveDistance(args) {
-        console.log('HELLO');
+        // console.log('HELLO');
         // let stepRate = this.motion.stepRate;
         let stepRate =  this.motion.stepRate;
         if (args.DIRECTION == 'front') {
@@ -1216,10 +1249,11 @@ class Module extends BaseModule {
     playNote(args) {
         const noteLabel = ['whole', 'half', 'dottedHalf', 'quarter', 'dottedQuarter', 'eight', 'dottedEight', 'sixteenth'];
         const noteId = noteLabel.findIndex(element => element === args.BEATS);
-        log('noteId' + noteId);
-        log('args.NOTE' + args.NOTE);
+        // log('noteId' + noteId);
+        // log('args.NOTE' + args.NOTE);
         this.setMusicNotes(args.NOTE, noteId, -1);
-        return this.resolveTimePromise((this.countNoteLength(noteId) * 1000) + 500);
+        // TODO try to remove line under
+        // return this.resolveTimePromise((this.countNoteLength(noteId) * 1000) + 500);
     }
 
     /**
@@ -1556,20 +1590,24 @@ class Module extends BaseModule {
      * @param {*} distance
      */
     startMotionStepsDistance(stepRate, distance) {
+        let stepTime = (distance * this.motion.distanceMultiplier / (Math.abs(stepRate) / (Math.abs(stepRate) * -0.01 + 11))) * 1000;
+
         if (this.linefollower.action > ACTION_STATE.PAUSE) {
             this.setLineFollower(false);
         } else {
-            log('setMotionStepsDistance'+distance);
+            //log('setMotionStepsDistance'+distance);
             distance = MathUtil.clamp(distance, GenibotDistanceLimit.MIN, GenibotDistanceLimit.MAX);
             this.setMotionStepsDistance(stepRate, distance);
+            // this.setMotionStepsDistance(stepRate, distance, stepTime);
         }
         // Stepping time rate = -0.01 * stepRate + 11, refer to Stepper gear ratio 1:50 at 1000sps
-        let stepTime = (distance * this.motion.distanceMultiplier / (Math.abs(stepRate) / (Math.abs(stepRate) * -0.01 + 11))) * 1000;
-        console.log('Stepping time in ms', stepTime);
+        // let stepTime = (distance * this.motion.distanceMultiplier / (Math.abs(stepRate) / (Math.abs(stepRate) * -0.01 + 11))) * 1000;
+        //console.log('Stepping time in ms', stepTime);
         /*if (this.robot.version < 7) {
             return this.resolveVersionError();
         }*/
-        return this.resolveTimePromise(stepTime);
+
+        // return this.resolveTimePromise(stepTime);
     }
 
     /**
