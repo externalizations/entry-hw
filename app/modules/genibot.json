@@ -21,6 +21,7 @@
         "parity" : "none",
         "dataBits" : 8,
         "stopBits" : 1,
-        "bufferSize" : 255
+        "flowControl": "hardware"
+
     }
 }

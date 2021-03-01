@@ -533,7 +533,7 @@ class Module extends BaseModule {
             const args = handler.read('SET_LED_COLOR_NAME');
             if (this.isValidACK(args['ACK'])) {
                 // log('setLedColorName');
-                this.logger.push(`set ledColorName ${args.LED} -${args.COLOR_NAME} -${args.COLOR_BRIGHTNESS} -`)
+                // this.logger.push(`set ledColorName ${args.LED} -${args.COLOR_NAME} -${args.COLOR_BRIGHTNESS} -`)
                 this.setLedColorName(args);
             }
         }
@@ -585,7 +585,7 @@ class Module extends BaseModule {
             //this.logger.push('args SET_ROBOT_SPEED_ITEM '+args['ACK'] +' hw ack: '+this.next_ack);
             if (this.isValidACK(args['ACK'])) {
                 let a =  await this.setRobotSpeedItem(args);
-                this.logger.push('args SET_ROBOT_SPEED_ITEM2 - '+ a);
+                // this.logger.push('args SET_ROBOT_SPEED_ITEM2 - '+ a);
             }
         }
 
@@ -599,7 +599,7 @@ class Module extends BaseModule {
         if (handler.e('MOTION_ROTATE_ANGLE')) {
             const args = handler.read('MOTION_ROTATE_ANGLE');
             if (this.isValidACK(args['ACK'])) {
-                this.logger.push('args MOVE_DISTANCE '+args.VELOCITY +' '+args.ANGLE);
+                // this.logger.push('args MOVE_DISTANCE '+args.VELOCITY +' '+args.ANGLE);
                 this.motionRotateAngle(args);
             }
         }
@@ -699,19 +699,34 @@ class Module extends BaseModule {
         //         }
         //     });
         // }
-        // var self = this;
-        if (this.sendBuffers.length > 0) {
+        const self = this;
+        if (this.sendBuffers.length > 0 && !self.isDraing) {
             // this.sp.write(this.sendBuffers.shift());
             // this.sendBuffers =[]
+            self.isDraing = true;
 
-            this.sp.write(this.sendBuffers.shift(), () => {
-                if (this.sp) {
-                    this.isDraing = false;
-                    // this.sp.drain(() => {
-                    //     this.isDraing = false;
-                    // });
-                }
-            });
+            const top = this.sendBuffers.shift();
+            let cmd = [];
+            let timeout = BLESendInterval;
+            if (Array.isArray(top[0])){
+                cmd = top[0];
+                timeout = top[1];
+            }else{
+                cmd = top;
+            }
+            // this.logger.push(cmd)
+            setTimeout(function() {
+                self.isDraing = false;
+            },timeout);
+            return cmd;
+            // this.sp.write(this.sendBuffers.shift(), () => {
+            //     if (this.sp) {
+            //         this.isDraing = false;
+            //         // this.sp.drain(() => {
+            //         //     this.isDraing = false;
+            //         // });
+            //     }
+            // });
         }
         // if (!this.isDraing && this.sendBuffers.length > 0) {
         //     this.isDraing = true;
@@ -1015,13 +1030,13 @@ class Module extends BaseModule {
         this.sendBuffers.push(command);
     }
 
-    // send(command,stepTime) {
-    //     if (!this.isConnected()) {
-    //         return;
-    //     }
-    //     // this.sendBuffers.push(...Array(10).fill(command));
-    //     this.sendBuffers.push([command,stepTime]);
-    // }
+    send2(command,stepTime) {
+        if (!this.isConnected()) {
+            return;
+        }
+        // this.sendBuffers.push(...Array(10).fill(command));
+        this.sendBuffers.push([command,stepTime]);
+    }
 
     /**
      * Return true if connected to the robot.
@@ -1321,7 +1336,11 @@ class Module extends BaseModule {
             ...motionProperty,
             ...steppers,
         ];
-        return this.send(command);
+        // return this.send(command);
+        // let stepTime = (distance * this.motion.distanceMultiplier / (Math.abs(stepRate) / (Math.abs(stepRate) * -0.01 + 11)))  * 1000;
+        // return this.send2(command,stepTime);
+
+        this.sp.write(command);
     }
 
     /**
@@ -1510,7 +1529,10 @@ class Module extends BaseModule {
             ...actionState,
             ...musicNotes,
         ];
-        return this.send(command);
+        // const resolveTime =  (this.countNoteLength(beatId) * 1000) + BLESendInterval;
+        // return this.send2(command,resolveTime);
+        // this.sp.write(command);
+        this.sp.write(command);
     }
 
     /**
